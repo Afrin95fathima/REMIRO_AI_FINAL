@@ -231,10 +231,21 @@ def render_chat_interface(master_agent, user_details):
                     
                     # If this is the final response, display download button
                     if master_agent.final_report_generated:
-                        offer_report_download(response, user_details)
+                        # Ensure response is a string for the download function
+                        if isinstance(response, tuple):
+                            report_text = str(response[0]) if response else "No report generated"
+                        else:
+                            report_text = str(response) if response else "No report generated"
+                        offer_report_download(report_text, user_details)
 
 def offer_report_download(report_text, user_details):
     """Offer a download button for the career report"""
+    
+    # Ensure report_text is a string
+    if isinstance(report_text, tuple):
+        report_text = str(report_text[0]) if report_text else "No report generated"
+    elif not isinstance(report_text, str):
+        report_text = str(report_text) if report_text else "No report generated"
     
     report_html = f"""
     <html>
