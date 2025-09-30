@@ -149,35 +149,31 @@ source venv/bin/activate- Work Environment Agent - Preferred work settings│
 
 3. Install dependencies:
 
-#### Phase 3: Practical Planning│   ├── master_agent.py    # Master Agent orchestrator
-
-**Option A: Standard Installation**
-
-```bash- Financial Agent - Compensation and financial strategy│   ├── skills_agent.py    # Skills & Competency Architect
-
-pip install -r requirements.txt
-
-```- Learning Agent - Development and skill building│   ├── values_agent.py    # Principle Navigator
-
-
-
-**Option B: If Option A fails (Minimal Installation)**- Career Trajectory Agent - Career progression planning│   ├── financial_agent.py # Financial Strategist
-
+**🚀 QUICK INSTALL (Most Users)**
 ```bash
-
-pip install -r requirements-minimal.txt- Role Fit Agent - Job compatibility assessment│   ├── learning_agent.py  # Learning Style Analyst
-
+pip install -r requirements.txt
 ```
 
-│   ├── industry_agent.py  # Industry Specialist
+**🛡️ SAFE INSTALL (If you get build errors)**
+```bash
+pip install -r requirements-minimal.txt
+```
 
-**Option C: Manual Installation (If both above fail)**
+**🪟 WINDOWS USERS (If you get "compiler not found" errors)**
+```bash
+pip install -r requirements-windows-safe.txt
+```
 
-```bash#### Phase 4: Integration│   ├── network_agent.py   # Relationship Builder
+**🔧 MANUAL INSTALL (If all above fail)**
+```bash
+pip install streamlit pandas numpy google-generativeai reportlab python-docx requests python-dotenv pillow
+```
 
-pip install streamlit
-
-pip install pandas>=1.3.0- Network Agent - Professional networking strategy│   ├── role_fit_agent.py  # Role Match Specialist
+**📦 CONDA INSTALL (Recommended for Windows)**
+```bash
+conda install streamlit pandas numpy
+pip install google-generativeai reportlab python-docx requests python-dotenv pillow
+```
 
 pip install google-generativeai
 
@@ -192,16 +188,65 @@ pip install requests python-dotenv pillow- Career Roadmap Agent - Comprehensive 
 │   ├── purpose_agent.py   # Meaning Architect
 
 4. Run the application:
-
-```bash## 🚀 Quick Start│   ├── career_trajectory_agent.py # Strategic Pathway Designer
-
+```bash
 streamlit run app.py
+```
 
-```│
+5. Open your browser and navigate to `http://localhost:8501`
 
+---
 
+## � TROUBLESHOOTING INSTALLATION ERRORS
 
-5. Open your browser and navigate to `http://localhost:8501`### Prerequisites├── utils/                 # Utility modules
+### ❌ **"Could not find compiler" or "Microsoft Visual C++ required"**
+
+**Solution 1 - Use Windows-Safe Requirements:**
+```bash
+pip install -r requirements-windows-safe.txt
+```
+
+**Solution 2 - Use Conda (Best for Windows):**
+```bash
+conda create -n remiro python=3.10
+conda activate remiro
+conda install streamlit pandas numpy
+pip install google-generativeai reportlab python-docx requests python-dotenv pillow
+```
+
+**Solution 3 - Install Pre-compiled Wheels Only:**
+```bash
+pip install --only-binary=all streamlit pandas numpy google-generativeai reportlab python-docx
+```
+
+### ❌ **"No matching distribution found for numpy"**
+
+**This happens with Python 3.13 or very old Python versions.**
+
+**Solution:**
+```bash
+pip install --upgrade pip
+pip install numpy==1.24.4 pandas==2.0.3
+pip install streamlit google-generativeai reportlab python-docx requests
+```
+
+### ❌ **"Building wheel failed"**
+
+**Solution:**
+```bash
+pip cache purge
+pip install --no-build-isolation --no-deps streamlit pandas numpy
+pip install google-generativeai reportlab python-docx requests python-dotenv pillow
+```
+
+### ❌ **"Package conflicts" or dependency errors**
+
+**Solution - Fresh Install:**
+```bash
+pip uninstall streamlit pandas numpy -y
+pip install -r requirements-minimal.txt
+```
+
+---
 
 
 

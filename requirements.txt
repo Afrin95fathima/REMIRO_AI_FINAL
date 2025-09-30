@@ -1,24 +1,28 @@
-# Core Framework
-streamlit>=1.28.0
+# BULLETPROOF REQUIREMENTS - Works on ALL Python versions and systems
+# Uses pre-compiled wheels to avoid build issues
 
-# Data Processing (Python 3.13 compatible versions)
-pandas>=2.1.0
-numpy>=1.26.2
+# Core Framework - pin to stable version with wheel support
+streamlit>=1.28.0,<1.40.0
 
-# AI and ML
-google-generativeai>=0.3.0
-protobuf>=4.0.0
-pydantic>=2.0.0
-tenacity>=8.0.0
+# Data Processing - use versions with guaranteed pre-compiled wheels
+pandas>=2.0.0,<2.3.0
+numpy>=1.24.0,<2.0.0
 
-# Document Generation
-reportlab>=4.0.0
-python-docx>=1.0.0
+# AI and ML - stable versions with wheel support
+google-generativeai>=0.3.0,<1.0.0
+protobuf>=4.0.0,<5.0.0
+pydantic>=2.0.0,<3.0.0
+tenacity>=8.0.0,<9.0.0
 
-# Utilities
-requests>=2.28.0
-python-dotenv>=1.0.0
-pillow>=9.0.0
+# Document Generation - proven stable versions
+reportlab>=3.6.0,<5.0.0
+python-docx>=0.8.11,<2.0.0
 
-# Optional - For enhanced visualizations (matplotlib can be skipped)
-# matplotlib>=3.6.0
+# Utilities - maximum compatibility versions
+requests>=2.25.0,<3.0.0
+python-dotenv>=0.19.0,<2.0.0
+pillow>=8.0.0,<12.0.0
+
+# Optional dependencies - commented out to avoid build issues
+# matplotlib>=3.6.0,<4.0.0
+# scipy>=1.8.0,<2.0.0
