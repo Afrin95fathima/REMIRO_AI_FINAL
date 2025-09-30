@@ -1,25 +1,23 @@
-# No-build requirements - Use only pre-compiled wheels
-# Use this if you get "compiler not found" or Visual Studio errors
-# These versions are guaranteed to have wheels for Windows/macOS/Linux
+# NO-BUILD REQUIREMENTS - Forces wheel-only installation
+# Use: pip install --only-binary=all -r requirements-no-build.txt
 
-# Core Framework
-streamlit==1.37.1
+# If ANY package tries to build from source, pip will refuse and show available wheels
 
-# Data Processing - Specific versions with guaranteed wheels
-pandas==2.0.3
-numpy==1.24.4
+streamlit
+pandas
+numpy  
+google-generativeai
+protobuf
+reportlab
+python-docx
+requests
+python-dotenv
+pillow
+typing-extensions
+six
 
-# AI and ML - Versions with wheels
-google-generativeai==0.7.2
-protobuf==4.24.4
-pydantic==2.5.3
-tenacity==8.2.3
-
-# Document Generation - Wheel-available versions
-reportlab==4.0.9
-python-docx==1.1.0
-
-# Utilities - Always have wheels
-requests==2.31.0
-python-dotenv==1.0.0
-pillow==10.0.1
+# Usage Instructions:
+# 1. pip install --only-binary=all -r requirements-no-build.txt
+# 2. If it fails, it means no pre-compiled wheel exists for your Python version
+# 3. Try: conda install streamlit pandas numpy
+# 4. Then: pip install google-generativeai reportlab python-docx requests

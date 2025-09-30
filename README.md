@@ -159,20 +159,30 @@ pip install -r requirements.txt
 pip install -r requirements-minimal.txt
 ```
 
-**🪟 WINDOWS USERS (If you get "compiler not found" errors)**
+**🪟 WINDOWS USERS (Compiler errors)**
 ```bash
-pip install -r requirements-windows-safe.txt
+pip install --only-binary=all -r requirements-windows-safe.txt
 ```
 
-**🔧 MANUAL INSTALL (If all above fail)**
+**� NUCLEAR OPTION (If EVERYTHING fails)**
 ```bash
-pip install streamlit pandas numpy google-generativeai reportlab python-docx requests python-dotenv pillow
+# Force wheel-only installation (will refuse to build anything)
+pip install --only-binary=all -r requirements-no-build.txt
 ```
 
-**📦 CONDA INSTALL (Recommended for Windows)**
+**📦 CONDA METHOD (Most Reliable for Windows)**
 ```bash
 conda install streamlit pandas numpy
 pip install google-generativeai reportlab python-docx requests python-dotenv pillow
+```
+
+**⚡ ONE-BY-ONE INSTALL (Ultimate fallback)**
+```bash
+pip install streamlit
+pip install pandas  
+pip install numpy
+pip install google-generativeai
+pip install reportlab python-docx requests python-dotenv pillow
 ```
 
 pip install google-generativeai

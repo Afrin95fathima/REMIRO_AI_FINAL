@@ -1,37 +1,30 @@
-# WINDOWS-SAFE REQUIREMENTS - Avoids ALL build issues
-# Use this if you get compiler/build errors on Windows
+# BULLETPROOF WINDOWS INSTALLATION - ZERO BUILD REQUIRED
+# This uses ONLY pre-compiled wheels to avoid ALL compiler issues
 
-# Install these one by one if bulk install fails:
-# pip install streamlit pandas numpy google-generativeai reportlab python-docx requests
+# Install with: pip install --only-binary=all -r requirements-windows-safe.txt
 
-# Core Framework - stable wheel version
-streamlit==1.35.0
+# Core Framework
+streamlit==1.37.1
 
-# Data Processing - guaranteed pre-compiled wheels for Windows
-pandas==2.0.3
-numpy==1.24.4
+# Data Processing - versions with guaranteed Windows wheels
+pandas==2.1.4  
+numpy==1.26.0
 
-# AI and ML - stable versions
-google-generativeai==0.7.2
-protobuf==4.24.4
+# AI and ML
+google-generativeai==0.8.0
+protobuf==4.25.1
 
-# Document Generation - proven Windows compatibility
-reportlab==4.0.4
-python-docx==0.8.11
+# Document Generation  
+reportlab==4.2.2
+python-docx==1.1.2
 
-# Utilities - rock-solid versions
+# Utilities
 requests==2.31.0
-python-dotenv==1.0.0
-pillow==10.0.1
+python-dotenv==1.0.1
+pillow==10.1.0
 
-# Compatibility helpers
-typing-extensions==4.7.1
+# Essential dependencies
+typing-extensions==4.8.0
 six==1.16.0
-setuptools>=65.0.0
-wheel>=0.37.0
 
-# Dependencies that might be missing
-certifi>=2023.7.22
-charset-normalizer>=3.2.0
-idna>=3.4
-urllib3>=2.0.4
+# Note: If this still fails, try the conda installation method in README
