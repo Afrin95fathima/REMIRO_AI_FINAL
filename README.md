@@ -102,9 +102,8 @@ Remiro AI is a comprehensive career guidance platform that leverages artificial 
 
 ### Prerequisites
 
-#### Phase 1: Self-Discovery10. **Emotional Intelligence Agent**: Assesses EQ and interpersonal effectiveness
-
-- Python 3.8 - 3.11 (recommended)
+- Python 3.9 - 3.13 (recommended: 3.10 or 3.11 for best compatibility)
+- pip package manager
 
 - pip package manager- Skills Agent - Technical and soft skills assessment11. **Track Record Agent**: Synthesizes past experiences into a career narrative
 
@@ -285,10 +284,9 @@ pip install google-generativeai reportlab python-docx```bash   ```
 streamlit run app.py   git clone https://github.com/yourusername/remiro-ai.git
 
 4. **Python version compatibility:**
-
-- Recommended: Python 3.8 - 3.11```   cd remiro-ai
-
-- Avoid Python 3.12 (some packages may not be compatible yet)
+- Recommended: Python 3.9 - 3.13 (best: 3.10 or 3.11)
+- Python 3.13 supported with updated numpy/pandas versions
+- Avoid very old versions (< 3.9) for best package compatibility
 
    ```
 

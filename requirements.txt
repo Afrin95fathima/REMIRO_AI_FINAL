@@ -1,9 +1,9 @@
 # Core Framework
 streamlit>=1.28.0
 
-# Data Processing (using more compatible versions)
-pandas>=1.5.0,<2.1.0
-numpy>=1.21.0
+# Data Processing (Python 3.13 compatible versions)
+pandas>=2.1.0
+numpy>=1.26.2
 
 # AI and ML
 google-generativeai>=0.3.0
