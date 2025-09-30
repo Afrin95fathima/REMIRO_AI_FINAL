@@ -8,11 +8,22 @@ from datetime import datetime
 from PIL import Image
 import io
 
-# Import core specialized agents
+# Import all specialized agents
 from agents.skills_agent import SkillsAgent
 from agents.values_agent import ValuesAgent
 from agents.financial_agent import FinancialAgent
 from agents.learning_agent import LearningAgent
+from agents.personality_agent import PersonalityAgent
+from agents.interests_agent import InterestsAgent
+from agents.work_environment_agent import WorkEnvironmentAgent
+from agents.industry_agent import IndustryAgent
+from agents.career_trajectory_agent import CareerTrajectoryAgent
+from agents.purpose_agent import PurposeAgent
+from agents.aspirations_agent import AspirationsAgent
+from agents.network_agent import NetworkAgent
+from agents.role_fit_agent import RoleFitAgent
+from agents.identity_agent import IdentityAgent
+from agents.career_roadmap_agent import CareerRoadmapAgent
 from utils.news_service import get_career_news
 
 class MasterAgent:
@@ -54,27 +65,68 @@ class MasterAgent:
         else:
             self.api_initialized = False
         
-        # Initialize core specialized agents with proper error handling
+        # Initialize all specialized agents with comprehensive error handling
         self.agents = {}
         try:
+            # Core foundational agents
             self.agents["skills"] = SkillsAgent()
             self.agents["values"] = ValuesAgent()
+            self.agents["personality"] = PersonalityAgent()
+            self.agents["interests"] = InterestsAgent()
+            
+            # Career strategy agents
             self.agents["financial"] = FinancialAgent()
             self.agents["learning"] = LearningAgent()
+            self.agents["work_environment"] = WorkEnvironmentAgent()
+            self.agents["industry"] = IndustryAgent()
+            
+            # Advanced planning agents
+            self.agents["career_trajectory"] = CareerTrajectoryAgent()
+            self.agents["purpose"] = PurposeAgent()
+            self.agents["aspirations"] = AspirationsAgent()
+            self.agents["role_fit"] = RoleFitAgent()
+            
+            # Integration and networking agents
+            self.agents["network"] = NetworkAgent()
+            self.agents["identity"] = IdentityAgent()
+            self.agents["career_roadmap"] = CareerRoadmapAgent()
+            
         except Exception as e:
             print(f"Error initializing agents: {str(e)}")
-            # Ensure at least the core agents are available
+            # Ensure at least the core agents are available as fallback
             if "skills" not in self.agents:
                 self.agents["skills"] = SkillsAgent()
             if "values" not in self.agents:
                 self.agents["values"] = ValuesAgent()
+            if "financial" not in self.agents:
+                self.agents["financial"] = FinancialAgent()
+            if "learning" not in self.agents:
+                self.agents["learning"] = LearningAgent()
         
-        # Define the agent sequence (order of interactions) - reduced to core agents
+        # Define the comprehensive agent sequence (logical order for career analysis)
         self.agent_sequence = [
-            "skills",
-            "values", 
-            "financial", 
-            "learning"
+            # Phase 1: Self-Discovery (Foundation)
+            "skills",           # What can you do?
+            "values",           # What matters to you?
+            "personality",      # How do you work best?
+            "interests",        # What excites you?
+            
+            # Phase 2: Career Strategy (Direction)
+            "purpose",          # Why do you work?
+            "aspirations",      # Where do you want to go?
+            "industry",         # Which fields align with you?
+            "work_environment", # What setting suits you?
+            
+            # Phase 3: Practical Planning (Implementation)
+            "financial",        # What are your financial needs?
+            "learning",         # How will you develop?
+            "career_trajectory",# What's your path?
+            "role_fit",         # What roles match you?
+            
+            # Phase 4: Integration (Action)
+            "network",          # Who will help you?
+            "identity",         # How do you present yourself?
+            "career_roadmap"    # What's your action plan?
         ]
         
         # Initialize agent results storage
@@ -152,16 +204,44 @@ We'll complete a **{session_type}** analysis that matches your available time.
         # Welcome to Remiro AI - Your Career Strategy Partner
         
         I'm your **Career Strategy Orchestrator**, and I'll guide you through a comprehensive
-        career analysis using Remiro AI's 12D agent system.
+        career analysis using Remiro AI's advanced 16-agent system.
+        
+        ## 🚀 Your Comprehensive Career Journey
         
         This interactive process will help you build an integrated career strategy through 
-        conversations with specialized agents, each focused on a different aspect of your
+        conversations with 16 specialized agents, each focused on a different aspect of your
         professional life and development.
         
-        We'll start with a series of focused conversations about various dimensions of your
-        career, and then integrate those insights into a holistic strategy.
+        ### 📋 Our 4-Phase Analysis:
         
-        Let's begin with understanding your skills and competencies.
+        **Phase 1: Self-Discovery** (4 agents)
+        - Skills & Competencies Assessment
+        - Personal Values Analysis  
+        - Personality & Work Style Evaluation
+        - Interests & Passion Mapping
+        
+        **Phase 2: Career Strategy** (4 agents)
+        - Life Purpose & Meaning
+        - Career Aspirations & Goals
+        - Industry & Market Analysis
+        - Work Environment Preferences
+        
+        **Phase 3: Practical Planning** (4 agents)
+        - Financial Strategy & Goals
+        - Learning & Development Path
+        - Career Trajectory Planning
+        - Role Fit & Compatibility
+        
+        **Phase 4: Integration** (4 agents)
+        - Professional Networking Strategy
+        - Identity & Personal Branding
+        - Comprehensive Career Roadmap
+        - Final Integration & Action Plan
+        
+        We'll start with understanding your foundational skills and competencies, then systematically
+        work through each dimension to create your personalized career blueprint.
+        
+        Let's begin your comprehensive career transformation!
         """
     
     def get_current_agent(self):
