@@ -9,6 +9,120 @@ class CareerRoadmapAgent:
     def __init__(self):
         self.name = "Career Path & Roadmap Generator"
         self.description = "Synthesizes all insights to create your personalized career path and development roadmap"
+        self.questions = [
+            "What are your most important career priorities for the next 2-3 years?",
+            "What kind of work environment and culture would make you feel most fulfilled?",
+            "What does career success look like to you in 5-10 years?"
+        ]
+        self.responses = []
+        self.current_question_index = 0
+        self.analysis_complete = False
+    
+    def process_message(self, message):
+        """Process user message and return appropriate response"""
+        
+        # Store the user's response
+        self.responses.append(message)
+        
+        # Check if we have asked all questions
+        if len(self.responses) >= len(self.questions):
+            # Generate final roadmap analysis
+            final_analysis = self._generate_roadmap_analysis()
+            self.analysis_complete = True
+            return final_analysis, True, self._get_results()
+        
+        # Ask the next question
+        if self.current_question_index < len(self.questions):
+            question = self._format_question(self.questions[self.current_question_index])
+            self.current_question_index += 1
+            return question, False, None
+        
+        # Fallback if something goes wrong
+        return "Thank you for your input. Let me generate your career roadmap.", True, self._get_results()
+    
+    def _format_question(self, question):
+        """Format question with nice styling"""
+        return f"""
+        # 🗺️ Career Roadmap & Action Planning
+        
+        ## 💭 {question}
+        
+        **Please share your thoughts:**
+        
+        Your response will help me create a comprehensive action plan tailored to your career goals and timeline.
+        """
+    
+    def _generate_roadmap_analysis(self):
+        """Generate roadmap analysis based on responses"""
+        if len(self.responses) >= 3:
+            priorities = self.responses[0]
+            environment = self.responses[1] 
+            success_vision = self.responses[2]
+        else:
+            priorities = "professional growth"
+            environment = "collaborative and supportive"
+            success_vision = "meaningful work with impact"
+        
+        return f"""
+        # 🗺️ Your Career Roadmap & Action Plan
+        
+        ## 🎯 Your Career Priorities
+        Based on your input: **{priorities}**
+        
+        ## 🏢 Ideal Work Environment  
+        You thrive in: **{environment}**
+        
+        ## 🚀 Your Success Vision
+        Your definition of success: **{success_vision}**
+        
+        ## 📋 Your Personalized Action Plan
+        
+        ### Phase 1: Foundation (Next 3-6 months)
+        - **Skills Assessment**: Evaluate current capabilities against target roles
+        - **Network Building**: Connect with professionals in your target industry
+        - **Market Research**: Study industry trends and opportunities
+        
+        ### Phase 2: Development (6-12 months)  
+        - **Skill Enhancement**: Address key skill gaps through training/courses
+        - **Experience Building**: Seek projects or roles that build relevant experience
+        - **Personal Branding**: Develop your professional online presence
+        
+        ### Phase 3: Transition (12-18 months)
+        - **Opportunity Seeking**: Actively pursue roles aligned with your goals
+        - **Interview Preparation**: Practice and refine your interview skills
+        - **Decision Making**: Evaluate offers against your criteria
+        
+        ### Phase 4: Growth (18+ months)
+        - **Performance Excellence**: Excel in your new role
+        - **Continued Learning**: Stay updated with industry developments
+        - **Future Planning**: Set next-level career objectives
+        
+        ## 🎯 Key Success Metrics
+        - Progress on skill development goals
+        - Quality of professional network connections
+        - Alignment of opportunities with your values
+        - Movement toward your success vision
+        
+        Your career roadmap is a living document - review and adjust it quarterly based on new experiences and evolving goals!
+        """
+    
+    def _get_results(self):
+        """Get analysis results for integration"""
+        if len(self.responses) >= 3:
+            return {
+                "career_priorities": self.responses[0],
+                "work_environment_preference": self.responses[1],
+                "success_definition": self.responses[2],
+                "roadmap_type": "comprehensive_action_plan",
+                "analysis_complete": self.analysis_complete
+            }
+        return {
+            "career_priorities": "professional development",
+            "work_environment_preference": "collaborative",
+            "success_definition": "meaningful impact",
+            "roadmap_type": "basic_action_plan",
+            "analysis_complete": self.analysis_complete
+        }
     
     def generate_roadmap(self, analysis_results):
         """Generate a comprehensive career roadmap based on all agent results"""
