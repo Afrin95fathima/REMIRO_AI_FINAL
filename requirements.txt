@@ -1,13 +1,24 @@
+# Core Framework
 streamlit==1.32.0
+
+# Data Processing
 pandas==2.1.0
 numpy==1.26.0
-matplotlib==3.8.0
-pillow==10.0.1
-requests==2.31.0
+
+# AI and ML
 google-generativeai==0.3.2
-python-dotenv==1.0.0
 protobuf==4.25.0
 pydantic==2.6.0
 tenacity==8.2.3
+
+# Document Generation
 reportlab==4.0.4
 python-docx==1.1.0
+
+# Utilities
+requests==2.31.0
+python-dotenv==1.0.0
+pillow==10.0.1
+
+# Optional - For enhanced visualizations
+matplotlib==3.8.0
