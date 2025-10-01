@@ -74,6 +74,52 @@ def convert_markdown_to_html(text):
     
     return styled_content
 
+def render_interactive_question(question_data, key):
+    """Render an interactive question with multiple choice options"""
+    if not question_data or not isinstance(question_data, dict):
+        return None
+    
+    question_text = question_data.get("question", "")
+    question_type = question_data.get("type", "text")
+    options = question_data.get("options", [])
+    
+    st.markdown(f"### 💭 {question_text}")
+    
+    if question_type == "multiple_choice" and options:
+        st.markdown("**Select all that apply:**")
+        
+        selected_options = []
+        
+        # Create columns for better layout
+        num_cols = min(2, len(options))  # Max 2 columns
+        cols = st.columns(num_cols)
+        
+        for i, option in enumerate(options):
+            col_index = i % num_cols
+            with cols[col_index]:
+                if st.checkbox(option, key=f"{key}_{i}"):
+                    selected_options.append(option)
+        
+        # Add submit button
+        if st.button("Submit Answers", key=f"{key}_submit", type="primary"):
+            if selected_options:
+                return selected_options
+            else:
+                st.warning("Please select at least one option.")
+                return None
+        
+        return None  # Don't submit until button is pressed
+    else:
+        # Fallback to text input for other question types
+        text_response = st.text_input("Your answer:", key=f"{key}_text")
+        if st.button("Submit", key=f"{key}_submit", type="primary"):
+            if text_response.strip():
+                return text_response.strip()
+            else:
+                st.warning("Please provide an answer.")
+                return None
+        return None
+
 def simulate_typing_delay(text_length):
     """Simulate natural typing delay based on text length"""
     # Base delay of 2-4 seconds + additional time based on text length
@@ -442,7 +488,7 @@ def render_moving_background():
     pass
 
 def render_chat_interface(master_agent, user_details):
-    """Render the simplified chat interface"""
+    """Render the enhanced chat interface with interactive questions"""
     
     # Initialize current agent state if not present
     if "current_agent_name" not in st.session_state:
@@ -452,7 +498,13 @@ def render_chat_interface(master_agent, user_details):
         else:
             st.session_state.current_agent_name = "master"
     
-    # Show current agent indicator - simplified
+    # Initialize question state
+    if "current_question" not in st.session_state:
+        st.session_state.current_question = None
+        st.session_state.current_question_index = 0
+        st.session_state.waiting_for_answer = False
+    
+    # Show current agent indicator
     current_agent_name = st.session_state.current_agent_name.replace("_", " ").title()
     
     if master_agent.final_integration_started:
@@ -460,105 +512,233 @@ def render_chat_interface(master_agent, user_details):
     else:
         st.markdown(f"### 👤 **Current Focus:** {current_agent_name} Analysis")
     
-    # Display chat messages from history on app rerun
+    # Display chat messages from history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+            if message["role"] == "assistant":
+                # Check if this message contains a question that needs interactive handling
+                if "current_question_data" in message and message.get("interactive", False):
+                    # This is an interactive question - render it specially
+                    question_data = message["current_question_data"]
+                    st.markdown(message["content"])
+                else:
+                    # Regular message - display normally
+                    st.markdown(message["content"])
+            else:
+                st.markdown(message["content"])
     
-    # React to user input
-    if prompt := st.chat_input("Type your response here..."):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    # Handle interactive question flow
+    if st.session_state.waiting_for_answer and st.session_state.current_question:
+        question_data = st.session_state.current_question
+        question_key = f"q_{st.session_state.current_question_index}_{time.time()}"
         
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        # Render the interactive question
+        user_response = render_interactive_question(question_data, question_key)
         
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            response_placeholder = st.empty()
+        if user_response is not None:
+            # User submitted an answer
+            st.session_state.waiting_for_answer = False
             
-            # Show typing indicator and simulate natural delay
-            typing_placeholder = st.empty()
-            typing_placeholder.markdown("🤔 *Analyzing your response...*")
+            # Process the response
+            if isinstance(user_response, list):
+                response_text = ", ".join(user_response)
+            else:
+                response_text = str(user_response)
             
-            # Process the message with natural timing
-            try:
-                # Process the message through the master agent
-                response_data = master_agent.process_message(prompt, user_details)
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": f"Selected: {response_text}"})
+            
+            # Process with master agent
+            with st.chat_message("assistant"):
+                typing_placeholder = st.empty()
+                typing_placeholder.markdown("🤔 *Analyzing your response...*")
                 
-                # Simulate natural thinking time (5-10 seconds)
-                thinking_time = random.uniform(5.0, 10.0)
-                time.sleep(thinking_time)
-                
-                # Clear typing indicator
-                typing_placeholder.empty()
-                
-                # Check response structure
-                if isinstance(response_data, tuple):
-                    if len(response_data) == 2:
-                        response, is_complete = response_data
-                        results = None
-                    elif len(response_data) == 3:
-                        response, is_complete, results = response_data
+                try:
+                    # Process the message through the master agent
+                    response_data = master_agent.process_message(response_text, user_details)
+                    
+                    # Simulate natural thinking time
+                    thinking_time = random.uniform(3.0, 6.0)
+                    time.sleep(thinking_time)
+                    
+                    typing_placeholder.empty()
+                    
+                    # Handle response
+                    if isinstance(response_data, tuple):
+                        if len(response_data) == 2:
+                            response, is_complete = response_data
+                            results = None
+                        elif len(response_data) == 3:
+                            response, is_complete, results = response_data
+                        else:
+                            response = str(response_data)
+                            is_complete = False
+                            results = None
                     else:
                         response = str(response_data)
                         is_complete = False
                         results = None
+                    
+                    # Display the response
+                    st.markdown(response)
+                    
+                    # Add response to chat history
+                    st.session_state.messages.append({"role": "assistant", "content": response})
+                    
+                    # Check if we need to ask another question
+                    current_agent = master_agent.get_current_agent()
+                    if current_agent and not is_complete:
+                        # Get next question from current agent
+                        next_question = get_next_question_from_agent(current_agent, st.session_state.current_question_index + 1)
+                        if next_question:
+                            st.session_state.current_question = next_question
+                            st.session_state.current_question_index += 1
+                            st.session_state.waiting_for_answer = True
+                            st.rerun()
+                    
+                    # Handle agent completion
+                    if is_complete:
+                        handle_agent_completion(master_agent, results)
+                        
+                except Exception as e:
+                    typing_placeholder.empty()
+                    st.error(f"An error occurred: {str(e)}")
+            
+            st.rerun()
+    
+    # Regular chat input for non-interactive questions or initial messages
+    elif not st.session_state.waiting_for_answer:
+        if prompt := st.chat_input("Type your response here..."):
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            
+            # Display user message
+            with st.chat_message("user"):
+                st.markdown(prompt)
+            
+            # Process the message
+            process_regular_message(master_agent, user_details, prompt)
+
+def get_next_question_from_agent(agent, question_index):
+    """Get the next question from an agent"""
+    if hasattr(agent, 'questions') and question_index < len(agent.questions):
+        return agent.questions[question_index]
+    return None
+
+def handle_agent_completion(master_agent, results):
+    """Handle when an agent completes its analysis"""
+    if results and not master_agent.final_integration_started:
+        # Move to next agent
+        next_agent = master_agent.move_to_next_agent()
+        
+        if next_agent:
+            # Update current agent name
+            st.session_state.current_agent_name = master_agent.agent_sequence[master_agent.current_agent_index]
+            
+            # Start with first question of next agent
+            first_question = get_next_question_from_agent(next_agent, 0)
+            if first_question:
+                st.session_state.current_question = first_question
+                st.session_state.current_question_index = 0
+                st.session_state.waiting_for_answer = True
+            
+            # Add transition message
+            transition_msg = f"Great! Now let's move to the **{st.session_state.current_agent_name.replace('_', ' ').title()}** analysis."
+            st.session_state.messages.append({"role": "assistant", "content": transition_msg})
+        else:
+            # We've gone through all agents, moving to final integration
+            st.session_state.current_agent_name = "master"
+            st.session_state.current_question = None
+            st.session_state.waiting_for_answer = False
+    
+    # If this is the final response, display download button
+    if master_agent.final_report_generated:
+        # Get the last assistant message as the report
+        last_message = None
+        for msg in reversed(st.session_state.messages):
+            if msg["role"] == "assistant":
+                last_message = msg["content"]
+                break
+        
+        if last_message:
+            offer_report_download(last_message, st.session_state.get("user_details", {}))
+
+def process_regular_message(master_agent, user_details, prompt):
+    """Process a regular text message"""
+    with st.chat_message("assistant"):
+        typing_placeholder = st.empty()
+        typing_placeholder.markdown("🤔 *Analyzing your response...*")
+        
+        try:
+            # Process the message through the master agent
+            response_data = master_agent.process_message(prompt, user_details)
+            
+            # Simulate natural thinking time
+            thinking_time = random.uniform(5.0, 10.0)
+            time.sleep(thinking_time)
+            
+            typing_placeholder.empty()
+            
+            # Handle response structure
+            if isinstance(response_data, tuple):
+                if len(response_data) == 2:
+                    response, is_complete = response_data
+                    results = None
+                elif len(response_data) == 3:
+                    response, is_complete, results = response_data
                 else:
                     response = str(response_data)
                     is_complete = False
                     results = None
-                    
-            except Exception as e:
-                typing_placeholder.empty()
-                st.error(f"An error occurred: {str(e)}")
-                response = "I apologize for the error. Please try rephrasing your response."
+            else:
+                response = str(response_data)
                 is_complete = False
                 results = None
-                
-                # Display the response with proper formatting
-                if master_agent.final_report_generated:
-                    # This is the final report - display as formatted HTML
-                    formatted_html = format_final_report_display(response)
-                    response_placeholder.markdown(formatted_html, unsafe_allow_html=True)
-                else:
-                    # Regular agent responses - display as markdown
-                    response_placeholder.markdown(response)
-                
-                # Add response to chat history
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                
-                # If agent has completed its part, move to the next agent
-                if is_complete:
-                    if results and not master_agent.final_integration_started:
-                        # Move to next agent
-                        next_agent = master_agent.move_to_next_agent()
+            
+            # Display the response with proper formatting
+            if master_agent.final_report_generated:
+                # This is the final report - display as formatted HTML
+                formatted_html = format_final_report_display(response)
+                st.markdown(formatted_html, unsafe_allow_html=True)
+            else:
+                # Check if response contains a question that should be interactive
+                current_agent = master_agent.get_current_agent()
+                if current_agent and hasattr(current_agent, 'questions') and not is_complete:
+                    # This might be a question - check if we should make it interactive
+                    next_question = get_next_question_from_agent(current_agent, 0)
+                    if next_question:
+                        st.session_state.current_question = next_question
+                        st.session_state.current_question_index = 0
+                        st.session_state.waiting_for_answer = True
                         
-                        if next_agent:
-                            # Update current agent name
-                            st.session_state.current_agent_name = master_agent.agent_sequence[master_agent.current_agent_index]
-                            
-                            # Add transition message
-                            transition_msg = f"Great! Now let's move to the **{st.session_state.current_agent_name.replace('_', ' ').title()}** analysis."
-                            
-                            # Add the transition message
-                            st.markdown(transition_msg)
-                            st.session_state.messages.append({"role": "assistant", "content": transition_msg})
-                            
-                        else:
-                            # We've gone through all agents, moving to final integration
-                            st.session_state.current_agent_name = "master"
-                            st.markdown("Now I'll create your personalized career guidance report.")
-                    
-                    # If this is the final response, display download button
-                    if master_agent.final_report_generated:
-                        # Ensure response is a string for the download function
-                        if isinstance(response, tuple):
-                            report_text = str(response[0]) if response else "No report generated"
-                        else:
-                            report_text = str(response) if response else "No report generated"
-                        offer_report_download(report_text, user_details)
+                        # Display the question text but mark it for interactive handling
+                        st.markdown(response)
+                        st.session_state.messages.append({
+                            "role": "assistant", 
+                            "content": response,
+                            "interactive": True,
+                            "current_question_data": next_question
+                        })
+                        st.rerun()
+                        return
+                
+                # Regular response
+                st.markdown(response)
+            
+            # Add response to chat history
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            
+            # Handle completion
+            if is_complete:
+                handle_agent_completion(master_agent, results)
+                
+        except Exception as e:
+            typing_placeholder.empty()
+            st.error(f"An error occurred: {str(e)}")
+            st.session_state.messages.append({
+                "role": "assistant", 
+                "content": "I apologize for the error. Please try rephrasing your response."
+            })
 
 def offer_report_download(report_text, user_details):
     """Offer a download button for the career report"""
