@@ -101,6 +101,18 @@ def main():
                     min_value=0, max_value=40, value=2, step=1
                 )
             
+            # Add session duration preference
+            st.markdown("#### Session Preferences")
+            session_duration = st.selectbox(
+                "How much time do you have for this session?",
+                [
+                    "Quick (10-15 minutes) - Essential questions only",
+                    "Standard (20-30 minutes) - Comprehensive analysis", 
+                    "Deep Dive (45-60 minutes) - Thorough exploration",
+                    "Extended (60+ minutes) - Complete career assessment"
+                ]
+            )
+            
             session_focus = st.multiselect(
                 "What are your main career concerns? (Select up to 3)",
                 ["Career Change", "Skill Development", "Job Search", "Advancement", 
@@ -110,19 +122,23 @@ def main():
             
             if st.button("Start My Career Analysis", type="primary"):
                 if name and age:
-                    # Store details
+                    # Store details with session preferences
+                    session_type = session_duration.split(" ")[0].lower()  # Extract: quick, standard, deep, extended
+                    
                     st.session_state.user_details = {
                         "name": name,
                         "age": age,
                         "education_level": education_level,
                         "years_experience": years_experience,
+                        "session_duration": session_duration,
+                        "session_type": session_type,
                         "session_focus": session_focus,
                         "user_id": f"{name.lower().replace(' ', '_')}_{hash(name) % 10000}"
                     }
                     st.session_state.messages = []
                     
                     # Initialize with welcome message
-                    welcome_message = st.session_state.master_agent.get_welcome_message(name, "comprehensive")
+                    welcome_message = st.session_state.master_agent.get_welcome_message(name, session_type)
                     st.session_state.messages.append({"role": "assistant", "content": welcome_message})
                     
                     st.rerun()

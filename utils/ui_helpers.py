@@ -1,6 +1,8 @@
 import streamlit as st
 import base64
 import re
+import time
+import random
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -71,6 +73,30 @@ def convert_markdown_to_html(text):
     """
     
     return styled_content
+
+def simulate_typing_delay(text_length):
+    """Simulate natural typing delay based on text length"""
+    # Base delay of 2-4 seconds + additional time based on text length
+    base_delay = random.uniform(2.0, 4.0)
+    length_delay = min(text_length / 50, 6.0)  # Max 6 seconds additional
+    total_delay = base_delay + length_delay
+    
+    # Show typing indicator
+    typing_placeholder = st.empty()
+    typing_placeholder.markdown("🤔 *Thinking...*")
+    time.sleep(total_delay)
+    typing_placeholder.empty()
+
+def render_multiple_choice_question(question, options, key):
+    """Render a multiple choice question with checkboxes"""
+    st.markdown(f"**{question}**")
+    
+    selected_options = []
+    for i, option in enumerate(options):
+        if st.checkbox(option, key=f"{key}_{i}"):
+            selected_options.append(option)
+    
+    return selected_options
 
 def format_final_report_display(text):
     """Specifically format final career reports for optimal display"""
@@ -452,33 +478,44 @@ def render_chat_interface(master_agent, user_details):
         with st.chat_message("assistant"):
             response_placeholder = st.empty()
             
-            # Process the message with a spinner
-            with st.spinner("Analyzing your response..."):
-                try:
-                    # Process the message through the master agent
-                    response_data = master_agent.process_message(prompt, user_details)
-                    
-                    # Check response structure
-                    if isinstance(response_data, tuple):
-                        if len(response_data) == 2:
-                            response, is_complete = response_data
-                            results = None
-                        elif len(response_data) == 3:
-                            response, is_complete, results = response_data
-                        else:
-                            response = str(response_data)
-                            is_complete = False
-                            results = None
+            # Show typing indicator and simulate natural delay
+            typing_placeholder = st.empty()
+            typing_placeholder.markdown("🤔 *Analyzing your response...*")
+            
+            # Process the message with natural timing
+            try:
+                # Process the message through the master agent
+                response_data = master_agent.process_message(prompt, user_details)
+                
+                # Simulate natural thinking time (5-10 seconds)
+                thinking_time = random.uniform(5.0, 10.0)
+                time.sleep(thinking_time)
+                
+                # Clear typing indicator
+                typing_placeholder.empty()
+                
+                # Check response structure
+                if isinstance(response_data, tuple):
+                    if len(response_data) == 2:
+                        response, is_complete = response_data
+                        results = None
+                    elif len(response_data) == 3:
+                        response, is_complete, results = response_data
                     else:
                         response = str(response_data)
                         is_complete = False
                         results = None
-                        
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
-                    response = "I apologize for the error. Please try rephrasing your response."
+                else:
+                    response = str(response_data)
                     is_complete = False
                     results = None
+                    
+            except Exception as e:
+                typing_placeholder.empty()
+                st.error(f"An error occurred: {str(e)}")
+                response = "I apologize for the error. Please try rephrasing your response."
+                is_complete = False
+                results = None
                 
                 # Display the response with proper formatting
                 if master_agent.final_report_generated:

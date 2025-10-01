@@ -135,6 +135,25 @@ class MasterAgent:
         # Initialize current agent index
         self.current_agent_index = 0
         
+        # Context awareness and session management
+        self.conversation_context = {}  # Store all user responses for context awareness
+        self.session_preferences = {}  # Store user session preferences
+        
+        # Agent sequence based on session type
+        self.full_agent_sequence = [
+            "skills", "values", "personality", "interests", "purpose", "aspirations",
+            "work_environment", "industry", "financial", "learning", "career_trajectory",
+            "network", "role_fit", "identity", "career_roadmap"
+        ]
+        
+        # Adjusted sequences for different session types
+        self.session_sequences = {
+            "quick": ["skills", "values", "financial", "career_roadmap"],
+            "standard": ["skills", "values", "personality", "interests", "financial", "learning", "career_trajectory", "career_roadmap"],
+            "deep": ["skills", "values", "personality", "interests", "purpose", "work_environment", "financial", "learning", "career_trajectory", "network", "career_roadmap"],
+            "extended": self.full_agent_sequence
+        }
+        
         # Initialize conversation state
         self.conversation = []
         
@@ -147,26 +166,52 @@ class MasterAgent:
         # Initialize user data
         self.user_data = {}
     
-    def get_welcome_message(self, name, available_time):
+    def set_session_preferences(self, user_details):
+        """Set session preferences and adjust agent sequence accordingly"""
+        self.session_preferences = user_details
+        session_type = user_details.get("session_type", "standard")
+        
+        # Set agent sequence based on session type
+        self.agent_sequence = self.session_sequences.get(session_type, self.session_sequences["standard"])
+        
+        # Store user context for agent awareness
+        self.conversation_context.update({
+            "user_profile": {
+                "name": user_details.get("name", ""),
+                "age": user_details.get("age", ""),
+                "education_level": user_details.get("education_level", ""),
+                "years_experience": user_details.get("years_experience", 0),
+                "session_focus": user_details.get("session_focus", []),
+                "session_duration": user_details.get("session_duration", "")
+            }
+        })
+        
+        # Pass context to all agents
+        for agent in self.agents.values():
+            if hasattr(agent, 'set_context'):
+                agent.set_context(self.conversation_context)
+    
+    def get_welcome_message(self, name, session_type):
         """Generate a welcome message with career news"""
         news_items = get_career_news()
         news_text = ""
         
-        # Include 1-2 news items depending on available time
+        # Include 1-2 news items depending on session type
         if news_items:
             news_text = "\n\n**📰 Recent Career News:**\n"
-            news_count = 1 if "5 min" in available_time else 2
+            news_count = 1 if session_type == "quick" else 2
             
             for i, news in enumerate(news_items[:news_count]):
                 news_text += f"- **{news['title']}**: {news['summary']}\n"
         
-        time_mapping = {
-            "Quick (5 min)": "focused",
-            "Standard (15 min)": "comprehensive", 
-            "Comprehensive (30+ min)": "in-depth"
+        session_descriptions = {
+            "quick": "focused assessment",
+            "standard": "comprehensive analysis", 
+            "deep": "in-depth exploration",
+            "extended": "complete career assessment"
         }
         
-        session_type = time_mapping.get(available_time, "personalized")
+        session_description = session_descriptions.get(session_type, "personalized assessment")
         
         # Get the first agent and its introduction
         first_agent = self.get_current_agent()
@@ -177,7 +222,7 @@ class MasterAgent:
         
         message = f"""# Welcome to Remiro AI, {name}! 🎯
 
-I'm your **Career Strategy Orchestrator**, and I'll guide you through a comprehensive career analysis using 4 core specialized agents.
+I'm your **Career Strategy Orchestrator**, and I'll guide you through a {session_description} using {len(self.agent_sequence)} specialized agents.
 
 {news_text}
 
