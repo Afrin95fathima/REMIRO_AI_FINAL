@@ -13,46 +13,120 @@ import io
 import os
 
 def convert_markdown_to_html(text):
-    """Convert markdown formatting to clean HTML"""
-    # Convert headers
-    text = re.sub(r'^### (.*)', r'<h3>\1</h3>', text, flags=re.MULTILINE)
-    text = re.sub(r'^## (.*)', r'<h2>\1</h2>', text, flags=re.MULTILINE)
-    text = re.sub(r'^# (.*)', r'<h1>\1</h1>', text, flags=re.MULTILINE)
+    """Convert markdown formatting to clean HTML for display"""
+    if not text:
+        return ""
+        
+    # Convert headers with proper styling
+    text = re.sub(r'^### (.*)', r'<h3 style="color: #5a6fd8; font-size: 18px; margin-top: 25px; margin-bottom: 10px;">\1</h3>', text, flags=re.MULTILINE)
+    text = re.sub(r'^## (.*)', r'<h2 style="color: #4c63d2; font-size: 22px; margin-top: 30px; margin-bottom: 15px; border-left: 4px solid #667eea; padding-left: 15px;">\1</h2>', text, flags=re.MULTILINE)
+    text = re.sub(r'^# (.*)', r'<h1 style="color: #667eea; font-size: 28px; text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 15px;">\1</h1>', text, flags=re.MULTILINE)
     
     # Convert bold text
-    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong style="color: #4c63d2; font-weight: bold;">\1</strong>', text)
     
     # Convert italic text
-    text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
+    text = re.sub(r'\*(.*?)\*', r'<em style="color: #5a6fd8; font-style: italic;">\1</em>', text)
     
-    # Convert bullet points
-    text = re.sub(r'^- (.*)', r'<li>\1</li>', text, flags=re.MULTILINE)
+    # Convert bullet points with better styling
+    text = re.sub(r'^- (.*)', r'<li style="margin: 8px 0; line-height: 1.6;">\1</li>', text, flags=re.MULTILINE)
     
-    # Wrap consecutive list items in ul tags
-    text = re.sub(r'(<li>.*?</li>\n?)+', lambda m: f'<ul>\n{m.group(0)}</ul>\n', text, flags=re.DOTALL)
+    # Wrap consecutive list items in styled ul tags
+    def replace_list(match):
+        return f'<ul style="margin: 15px 0; padding-left: 25px;">\n{match.group(0)}</ul>\n'
     
-    # Convert line breaks
-    text = text.replace('\n', '<br>\n')
+    text = re.sub(r'(<li[^>]*>.*?</li>\s*)+', replace_list, text, flags=re.DOTALL)
+    
+    # Convert numbered lists
+    text = re.sub(r'^(\d+)\. (.*)', r'<li style="margin: 8px 0; line-height: 1.6;">\2</li>', text, flags=re.MULTILINE)
+    
+    # Convert line breaks to proper spacing
+    text = text.replace('\n\n', '</p><p style="margin: 15px 0; line-height: 1.8;">')
+    text = text.replace('\n', '<br>')
+    
+    # Wrap content in paragraph tags
+    if not text.startswith('<'):
+        text = f'<p style="margin: 15px 0; line-height: 1.8;">{text}</p>'
     
     # Clean up extra br tags around headers and lists
-    text = re.sub(r'<br>\n(<h[1-3]>)', r'\1', text)
-    text = re.sub(r'(<h[1-3]>.*?</h[1-3]>)<br>\n', r'\1\n', text)
-    text = re.sub(r'<br>\n(<ul>)', r'\1', text)
-    text = re.sub(r'(</ul>)<br>\n', r'\1\n', text)
+    text = re.sub(r'<br>\s*(<h[1-3])', r'\1', text)
+    text = re.sub(r'(<h[1-3][^>]*>.*?</h[1-3]>)\s*<br>', r'\1', text)
+    text = re.sub(r'<br>\s*(<ul)', r'\1', text)
+    text = re.sub(r'(</ul>)\s*<br>', r'\1', text)
     
-    return text
+    # Wrap everything in a styled container
+    styled_content = f"""
+    <div style="
+        font-family: 'Times New Roman', Times, serif;
+        line-height: 1.8;
+        color: #333;
+        background-color: #fdfdfd;
+        padding: 30px;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+        margin: 20px 0;
+    ">
+        {text}
+    </div>
+    """
+    
+    return styled_content
+
+def format_final_report_display(text):
+    """Specifically format final career reports for optimal display"""
+    if not text:
+        return "No report content available."
+    
+    # Ensure text is a string
+    if isinstance(text, tuple):
+        text = str(text[0]) if text else ""
+    elif not isinstance(text, str):
+        text = str(text)
+    
+    # Convert markdown to styled HTML with enhanced styling for reports
+    formatted_html = convert_markdown_to_html(text)
+    
+    # Add a special wrapper for final reports
+    final_report_html = f"""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2px;
+        border-radius: 12px;
+        margin: 20px 0;
+    ">
+        <div style="
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        ">
+            <div style="
+                background: linear-gradient(90deg, #667eea, #764ba2);
+                color: white;
+                text-align: center;
+                padding: 15px;
+                margin-bottom: 0;
+            ">
+                <h2 style="
+                    margin: 0;
+                    font-family: 'Times New Roman', serif;
+                    font-size: 24px;
+                    font-weight: bold;
+                ">🚀 Your Career Strategy Report</h2>
+            </div>
+            {formatted_html}
+        </div>
+    </div>
+    """
+    
+    return final_report_html
 
 def format_report_for_display(text):
     """Format report text for better display in Streamlit"""
-    # Remove markdown syntax for cleaner display
-    clean_text = text
-    
-    # Remove markdown headers but keep the text
-    clean_text = re.sub(r'^### (.*)', r'### \1', clean_text, flags=re.MULTILINE)
-    clean_text = re.sub(r'^## (.*)', r'## \1', clean_text, flags=re.MULTILINE)
-    clean_text = re.sub(r'^# (.*)', r'# \1', clean_text, flags=re.MULTILINE)
-    
-    return clean_text
+    if not text:
+        return ""
+        
+    # Convert to HTML format for better display
+    return convert_markdown_to_html(text)
 
 def generate_pdf_report(report_text, user_details):
     """Generate PDF report"""
@@ -406,8 +480,14 @@ def render_chat_interface(master_agent, user_details):
                     is_complete = False
                     results = None
                 
-                # Display the response
-                response_placeholder.markdown(response)
+                # Display the response with proper formatting
+                if master_agent.final_report_generated:
+                    # This is the final report - display as formatted HTML
+                    formatted_html = format_final_report_display(response)
+                    response_placeholder.markdown(formatted_html, unsafe_allow_html=True)
+                else:
+                    # Regular agent responses - display as markdown
+                    response_placeholder.markdown(response)
                 
                 # Add response to chat history
                 st.session_state.messages.append({"role": "assistant", "content": response})
